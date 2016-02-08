@@ -77,8 +77,13 @@ function(req, res) {
 /************************************************************/
 // Write your authentication routes here
 /************************************************************/
-//initial commit
+app.get('/login', function(req, res) {
+  res.render('login');  
+});
 
+app.get('/signup', function(req, res) {
+  res.render('signup');  
+});
 
 /************************************************************/
 // Handle the wildcard route last - if all other routes fail
