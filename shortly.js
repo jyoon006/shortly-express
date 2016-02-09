@@ -2,7 +2,7 @@ var express = require('express');
 var util = require('./lib/utility');
 var partials = require('express-partials');
 var bodyParser = require('body-parser');
-
+var session = require('express-session');
 
 var db = require('./app/config');
 var Users = require('./app/collections/users');
@@ -21,20 +21,29 @@ app.use(bodyParser.json());
 // Parse forms (signup/login)
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(__dirname + '/public'));
-
+app.use(session({secret: 'secret'}));
 
 app.get('/', 
 function(req, res) {
+  if (!req.session.username) {
+    res.redirect('/login');
+  }
   res.render('index');
 });
 
 app.get('/create', 
 function(req, res) {
+  if (!req.session.username) {
+    res.redirect('/login');
+  }
   res.render('index');
 });
 
 app.get('/links', 
 function(req, res) {
+  if (!req.session.username) {
+    res.redirect('/login');
+  }
   Links.reset().fetch().then(function(links) {
     res.send(200, links.models);
   });
@@ -104,7 +113,7 @@ app.post('/signup', function(req, res) {
 
   user.save().then(function(newUser) {
     Users.add(newUser);
-    res.render('index');
+    res.redirect('/');
   });
 });
 /************************************************************/

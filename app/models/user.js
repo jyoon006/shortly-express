@@ -14,13 +14,22 @@ var User = db.Model.extend({
   },
 
   initialize: function() {
-    console.log(this.password);
     this.on('creating', function(model, attrs, options) {
-      var salt = bcrypt.genSaltSync();   
-      var hash =  bcrypt.hashSync(model.get('password'), salt); 
-      model.set('password', hash);
-      console.log('finished hashing password');
+  
+      var hashing = Promise.promisify(bcrypt.hash);
+
+      return hashing(this.get('password'), null, null)
+        .bind(this)
+        .then(function(hash) {
+          console.log('hash: ' + hash);
+          this.set('password', hash);
+        })
     });
+  },
+
+  salting: function() {
+    var salt = bcrypt.genSaltSync();
+    this.set('salt', salt); 
   }
 });
 
