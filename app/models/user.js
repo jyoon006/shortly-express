@@ -14,27 +14,14 @@ var User = db.Model.extend({
   },
 
   initialize: function() {
+    console.log(this.password);
     this.on('creating', function(model, attrs, options) {
-      bcrypt.genSalt(10, function(err, salt) {
-        if(err) {
-          console.log('error while generating salt: ' + err);
-        }
-        bcrypt.hash(this.password, salt, null, function(err, hash) {
-          if(err) {
-            console.log('error while hashing the password: ' + err);
-          }
-          model.set('code', hash);
-        });
-      })
+      var salt = bcrypt.genSaltSync();   
+      var hash =  bcrypt.hashSync(model.get('password'), salt); 
+      model.set('password', hash);
+      console.log('finished hashing password');
     });
   }
-  // login: function() {
-
-  // },
-  // signup: function() {
-
-  // }
- 
 });
 
 module.exports = User;

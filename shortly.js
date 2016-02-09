@@ -85,6 +85,14 @@ app.get('/signup', function(req, res) {
   res.render('signup');  
 });
 
+app.get('/users', 
+function(req, res) {
+  Users.reset().fetch().then(function(users) {
+    res.send(200, users.models);
+  });
+});
+
+
 app.post('/signup', function(req, res) {
   var pw = req.body['password'];
   var user = req.body['username'];
