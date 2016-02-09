@@ -90,6 +90,30 @@ app.get('/login', function(req, res) {
   res.render('login');  
 });
 
+app.post('/login', function(req, res) {
+  var pw = req.body['password'];
+  var user = req.body['username'];
+
+  new User({username: user}).fetch().then(function(found) {
+    if(found) {
+      console.log('found')
+      //check if username and password validates
+      var hashed = util.checkPassword(pw, found.attributes.password);
+      if(hashed) {
+        console.log('something');
+        req.session.username = user;
+        res.redirect('/');
+      }
+      else {
+        res.redirect('/login');
+      }
+    }
+    res.redirect('/login');
+    
+  });
+
+});
+
 app.get('/signup', function(req, res) {
   res.render('signup');  
 });
