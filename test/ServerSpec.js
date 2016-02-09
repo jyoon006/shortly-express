@@ -59,7 +59,7 @@ describe('', function() {
       });
   });
 
-  xdescribe('Link creation:', function(){
+  describe('Link creation:', function(){
 
     var requestWithSession = request.defaults({jar: true});
 
@@ -186,7 +186,7 @@ describe('', function() {
         });
       });
 
-      it('Shortcode redirects to correct url', function(done) {
+      xit('Shortcode redirects to correct url', function(done) {
         var options = {
           'method': 'GET',
           'uri': 'http://127.0.0.1:4568/' + link.get('code')
@@ -199,7 +199,7 @@ describe('', function() {
         });
       });
 
-      it('Returns all of the links to display on the links page', function(done) {
+      xit('Returns all of the links to display on the links page', function(done) {
         var options = {
           'method': 'GET',
           'uri': 'http://127.0.0.1:4568/links'

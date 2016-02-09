@@ -96,11 +96,8 @@ app.post('/login', function(req, res) {
 
   new User({username: user}).fetch().then(function(found) {
     if(found) {
-      console.log('found')
-      //check if username and password validates
       var hashed = util.checkPassword(pw, found.attributes.password);
       if(hashed) {
-        console.log('something');
         req.session.username = user;
         res.redirect('/');
       }
@@ -112,6 +109,11 @@ app.post('/login', function(req, res) {
     
   });
 
+});
+
+app.get('/logout', function(req, res) {
+  req.session.username = null;
+  res.redirect('/login');
 });
 
 app.get('/signup', function(req, res) {
