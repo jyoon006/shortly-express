@@ -3,7 +3,6 @@ var util = require('./lib/utility');
 var partials = require('express-partials');
 var bodyParser = require('body-parser');
 var session = require('express-session');
-
 var db = require('./app/config');
 var Users = require('./app/collections/users');
 var User = require('./app/models/user');
@@ -12,6 +11,8 @@ var Link = require('./app/models/link');
 var Click = require('./app/models/click');
 var passport = require('passport');
 var Strategy = require('passport-facebook').Strategy;
+var cookieParser = require('cookie-parser');
+var flash = require('connect-flash');
 var app = express();
 
 app.set('views', __dirname + '/views');
@@ -22,52 +23,66 @@ app.use(bodyParser.json());
 // Parse forms (signup/login)
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(__dirname + '/public'));
-app.use(session({secret: 'secret'}));
+app.use(cookieParser('secret'));
+app.use(session({cookie: { maxAge: 60000 }}));
+app.use(flash());
+
+app.use(function(req, res, next){
+  res.locals.messages = req.session.messages || [];
+  delete req.session.messages;
+  next();
+});
+
+
+// app.all('/login', function(req, res){
+//   res.send(JSON.stringify(req.flash('test')));
+// });
 
 //*************OAUTH**************************//
 
-passport.use(new Strategy({
-  clientID: '',
-  clientSecret: '',
-  callbackURL:'http://localhost:4568/login/facebook/return'
-},
-  function(accessToken, refreshToken, profile, cb) {
+// passport.use(new Strategy({
+//   clientID: '',
+//   clientSecret: '',
+//   callbackURL:'http://localhost:4568/login/facebook/return'
+// },
+//   function(accessToken, refreshToken, profile, cb) {
 
 
-    return cb(null, profile);
+//     return cb(null, profile);
     
-  }
-));
+//   }
+// ));
 
-passport.serializeUser(function(user, cb) {
-  cb(null, user);
-});
-passport.deserializeUser(function(obj, cb) {
-  cb(null, obj);
-});
+// passport.serializeUser(function(user, cb) {
+//   cb(null, user);
+// });
+// passport.deserializeUser(function(obj, cb) {
+//   cb(null, obj);
+// });
 
-app.use(passport.initialize());
-app.use(passport.session());
+// app.use(passport.initialize());
+// app.use(passport.session());
 
-app.get('/login/facebook', passport.authenticate('facebook'));
+// app.get('/login/facebook', passport.authenticate('facebook'));
 
-app.get('/login/facebook/return', passport.authenticate('facebook', {failureRedirect: '/login'}),
-  function(req, res) {
-    res.redirect('/');
-  }
-);
+// app.get('/login/facebook/return', passport.authenticate('facebook', {failureRedirect: '/login'}),
+//   function(req, res) {
+//     res.redirect('/');
+//   }
+// );
 
 //*************OAUTH**************************//
 
 app.get('/', 
 function(req, res) {
-  res.render('index');
+  util.checkUser(req, res);
+  //res.render('index');
 });
 
 app.get('/create', 
 function(req, res) {
-  //util.checkUser(req, res);
-  res.render('index');
+  util.checkUser(req, res);
+  //res.render('index');
 });
 
 app.get('/links', 
@@ -121,7 +136,7 @@ app.get('/login', function(req, res) {
   res.render('login');  
 });
 
-app.post('/login', function(req, res) {
+app.post('/login', function(req, res, next) {
   var pw = req.body['password'];
   var user = req.body['username'];
 
@@ -131,15 +146,27 @@ app.post('/login', function(req, res) {
       if(hashed) {
         req.session.username = user;
         res.redirect('/');
+        next();
       }
       else {
+        //req.flash('failed', "Incorrect password");
         res.redirect('/login');
+        next();
       }
     }
+    //req.flash('failed', "Incorrect username");
     res.redirect('/login');
-    
+    next();
   });
+});
 
+// app.get('/login', function(req, res, next){
+//   req.flash('test', {messages: req.flash('testing')});
+// });
+
+
+app.post('/login', function(req, res, next){
+  res.render('messages', ["yoyoyoyoyo"]);
 });
 
 app.get('/logout', function(req, res) {
