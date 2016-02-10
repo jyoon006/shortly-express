@@ -133,10 +133,10 @@ function(req, res) {
 // Write your authentication routes here
 /************************************************************/
 app.get('/login', function(req, res) {
-  res.render('login');  
+  res.render('login', {message: ""});  
 });
 
-app.post('/login', function(req, res, next) {
+app.post('/login', function(req, res) {
   var pw = req.body['password'];
   var user = req.body['username'];
 
@@ -146,28 +146,15 @@ app.post('/login', function(req, res, next) {
       if(hashed) {
         req.session.username = user;
         res.redirect('/');
-        next();
       }
       else {
-        //req.flash('failed', "Incorrect password");
-        res.redirect('/login');
-        next();
+        res.render('login', {message: "invalid password"});
       }
     }
-    //req.flash('failed', "Incorrect username");
-    res.redirect('/login');
-    next();
+    res.render('login', {message: "invalid username"});
   });
 });
 
-// app.get('/login', function(req, res, next){
-//   req.flash('test', {messages: req.flash('testing')});
-// });
-
-
-app.post('/login', function(req, res, next){
-  res.render('messages', ["yoyoyoyoyo"]);
-});
 
 app.get('/logout', function(req, res) {
   req.session.username = null;
