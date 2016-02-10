@@ -6,8 +6,7 @@ var User = db.Model.extend({
   tableName: 'users',
   defaults: {
     username: "",
-    password: "",
-    salt: "$2a$10$.KPZ1X4FboZjrhjEHQTTrO"
+    password: ""
   },
 
   links: function() {
@@ -16,21 +15,17 @@ var User = db.Model.extend({
 
   initialize: function() {
 
+    var salt = bcrypt.genSaltSync();
     this.on('creating', function(model, attrs, options) {
   
       var hashing = Promise.promisify(bcrypt.hash);
 
-      return hashing(this.get('password'), this.get('salt'), null)
+      return hashing(this.get('password'), salt, null)
         .bind(this)
         .then(function(hash) {
           model.set('password', hash);
         })
     });
-  },
-
-  createSalt: function() {
-    this.set('salt', bcrypt.genSaltSync());
-    return this.get('salt');
   }
 });
 

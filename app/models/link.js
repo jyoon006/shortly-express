@@ -9,7 +9,6 @@ var Link = db.Model.extend({
     visits: 0
   },
   clicks: function() {
-    //one link(url) has many relation with click
     return this.hasMany(Click);
   },
   initialize: function(){

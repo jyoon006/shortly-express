@@ -10,7 +10,8 @@ var User = require('./app/models/user');
 var Links = require('./app/collections/links');
 var Link = require('./app/models/link');
 var Click = require('./app/models/click');
-
+var passport = require('passport');
+var Strategy = require('passport-facebook').Strategy;
 var app = express();
 
 app.set('views', __dirname + '/views');
@@ -23,19 +24,49 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(__dirname + '/public'));
 app.use(session({secret: 'secret'}));
 
+//*************OAUTH**************************//
+
+passport.use(new Strategy({
+  clientID: '',
+  clientSecret: '',
+  callbackURL:'http://localhost:4568/login/facebook/return'
+},
+  function(accessToken, refreshToken, profile, cb) {
+
+
+    return cb(null, profile);
+    
+  }
+));
+
+passport.serializeUser(function(user, cb) {
+  cb(null, user);
+});
+passport.deserializeUser(function(obj, cb) {
+  cb(null, obj);
+});
+
+app.use(passport.initialize());
+app.use(passport.session());
+
+app.get('/login/facebook', passport.authenticate('facebook'));
+
+app.get('/login/facebook/return', passport.authenticate('facebook', {failureRedirect: '/login'}),
+  function(req, res) {
+    res.redirect('/');
+  }
+);
+
+//*************OAUTH**************************//
+
 app.get('/', 
 function(req, res) {
-  if (!req.session.username) {
-    res.redirect('/login');
-  }
   res.render('index');
 });
 
 app.get('/create', 
 function(req, res) {
-  if (!req.session.username) {
-    res.redirect('/login');
-  }
+  //util.checkUser(req, res);
   res.render('index');
 });
 
@@ -120,13 +151,12 @@ app.get('/signup', function(req, res) {
   res.render('signup');  
 });
 
-app.get('/users', 
-function(req, res) {
-  Users.reset().fetch().then(function(users) {
-    res.send(200, users.models);
-  });
-});
-
+// app.get('/users', 
+// function(req, res) {
+//   Users.reset().fetch().then(function(users) {
+//     res.send(200, users.models);
+//   });
+// });
 
 app.post('/signup', function(req, res) {
   var pw = req.body['password'];
